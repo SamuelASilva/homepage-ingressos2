@@ -23,7 +23,7 @@ output "bucket_name" {
 
 output "api_gateway_url" {
   description = "URL do API Gateway para APIs"
-  value       = aws_apigatewayv2_api.padaria_api.api_endpoint
+  value       = aws_apigatewayv2_api.ingressos_api.api_endpoint
 }
 
 # ===================================
