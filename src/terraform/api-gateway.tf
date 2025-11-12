@@ -13,7 +13,7 @@ resource "aws_apigatewayv2_api" "padaria_api" {
 }
 
 # ===================================
-# STAGES
+# STAGES #
 # ===================================
 
 resource "aws_apigatewayv2_stage" "default" {
