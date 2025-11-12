@@ -1,11 +1,7 @@
-# ===================================
-# API GATEWAY HTTP API
-# ===================================
-
-resource "aws_apigatewayv2_api" "ingressos_api" {
+resource "aws_apigatewayv2_api" "padaria_api" {
   name          = "${var.project_name}-api-${var.environment}"
   protocol_type = "HTTP"
-  description   = "API Gateway para sistema da ingressos"
+  description   = "API Gateway para sistema da padaria"
 
   cors_configuration {
     allow_credentials = false
@@ -21,7 +17,7 @@ resource "aws_apigatewayv2_api" "ingressos_api" {
 # ===================================
 
 resource "aws_apigatewayv2_stage" "default" {
-  api_id      = aws_apigatewayv2_api.ingressos_api.id
+  api_id      = aws_apigatewayv2_api.padaria_api.id
   name        = "$default"
   auto_deploy = true
 
@@ -46,19 +42,19 @@ resource "aws_apigatewayv2_stage" "default" {
 
 # Integração Python Lambda
 resource "aws_apigatewayv2_integration" "python_lambda" {
-  api_id           = aws_apigatewayv2_api.ingressos_api.id
+  api_id           = aws_apigatewayv2_api.padaria_api.id
   integration_type = "AWS_PROXY"
 
   connection_type      = "INTERNET"
   description          = "Python Lambda integration"
   integration_method   = "POST"
-  integration_uri      = aws_lambda_function.python_lambda.invoke_arn
+  integration_uri      = module.python_lambda.lambda_function_invoke_arn
   passthrough_behavior = "WHEN_NO_MATCH"
 }
 
 # Integração Node.js Lambda
 resource "aws_apigatewayv2_integration" "nodejs_lambda" {
-  api_id           = aws_apigatewayv2_api.ingressos_api.id
+  api_id           = aws_apigatewayv2_api.padaria_api.id
   integration_type = "AWS_PROXY"
 
   connection_type      = "INTERNET"
@@ -74,39 +70,39 @@ resource "aws_apigatewayv2_integration" "nodejs_lambda" {
 
 # Rotas Python Lambda
 resource "aws_apigatewayv2_route" "python_get" {
-  api_id    = aws_apigatewayv2_api.ingressos_api.id
+  api_id    = aws_apigatewayv2_api.padaria_api.id
   route_key = "GET /python"
   target    = "integrations/${aws_apigatewayv2_integration.python_lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "python_post" {
-  api_id    = aws_apigatewayv2_api.ingressos_api.id
+  api_id    = aws_apigatewayv2_api.padaria_api.id
   route_key = "POST /python"
   target    = "integrations/${aws_apigatewayv2_integration.python_lambda.id}"
 }
 
 # Rotas Node.js Lambda
 resource "aws_apigatewayv2_route" "nodejs_get" {
-  api_id    = aws_apigatewayv2_api.ingressos_api.id
+  api_id    = aws_apigatewayv2_api.padaria_api.id
   route_key = "GET /nodejs"
   target    = "integrations/${aws_apigatewayv2_integration.nodejs_lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "nodejs_post" {
-  api_id    = aws_apigatewayv2_api.ingressos_api.id
+  api_id    = aws_apigatewayv2_api.padaria_api.id
   route_key = "POST /nodejs"
   target    = "integrations/${aws_apigatewayv2_integration.nodejs_lambda.id}"
 }
 
 # Rotas específicas do sistema da padaria
 resource "aws_apigatewayv2_route" "produtos_get" {
-  api_id    = aws_apigatewayv2_api.ingressos_api.id
+  api_id    = aws_apigatewayv2_api.padaria_api.id
   route_key = "GET /produtos"
   target    = "integrations/${aws_apigatewayv2_integration.python_lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "pedidos_post" {
-  api_id    = aws_apigatewayv2_api.ingressos_api.id
+  api_id    = aws_apigatewayv2_api.padaria_api.id
   route_key = "POST /pedidos"
   target    = "integrations/${aws_apigatewayv2_integration.nodejs_lambda.id}"
 }
@@ -118,9 +114,9 @@ resource "aws_apigatewayv2_route" "pedidos_post" {
 resource "aws_lambda_permission" "python_lambda_permission" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.python_lambda.function_name
+  function_name = module.python_lambda.lambda_function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.ingressos_api.execution_arn}/*/*"
+  source_arn    = "${aws_apigatewayv2_api.padaria_api.execution_arn}/*/*"
 }
 
 resource "aws_lambda_permission" "nodejs_lambda_permission" {
@@ -128,7 +124,7 @@ resource "aws_lambda_permission" "nodejs_lambda_permission" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.nodejs_lambda.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.ingressos_api.execution_arn}/*/*"
+  source_arn    = "${aws_apigatewayv2_api.padaria_api.execution_arn}/*/*"
 }
 
 # ===================================
