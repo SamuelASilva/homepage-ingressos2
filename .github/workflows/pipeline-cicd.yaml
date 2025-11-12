@@ -69,7 +69,7 @@ jobs:
     - name: Sync Frontend to S3
       if: github.event_name == 'push'
       run: |
-        BUCKET_NAME="homepage-padaria-online-frontend-development"
+        BUCKET_NAME="plataforma-de-ingresso-frontend-development"
         aws s3 sync src/frontend/ s3://$BUCKET_NAME --delete
         echo "Frontend synced to bucket: $BUCKET_NAME"
         
